@@ -1,3 +1,4 @@
 .svn
 *~
+/jquery.tablesorter*osm*.js
 /jquery.tablesorter*.min.js

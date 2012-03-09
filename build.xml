@@ -3,17 +3,25 @@
     <!-- SETUP -->
 	<property description="Files for parsing etc." name="BUILD_DIR" value="build" />
     <property description="Rhino JS Engine" name="JAR" value="${BUILD_DIR}/js.jar" />
+    <property description="Tablesorter version" name="TS_VERSION" value="2.0.5b" />
+    <property description="OSM version" name="OSM_VERSION" value="1" />
 
     <!-- Files names for distribution -->
     <property name="TS" value="jquery.tablesorter.js" />
-	<property name="TS_MIN" value="jquery.tablesorter.min.js" />
+    <property name="TS_VERSIONED" value="jquery.tablesorter-${TS_VERSION}.osm${OSM_VERSION}.js" />
+	<property name="TS_MIN" value="jquery.tablesorter-${TS_VERSION}.osm${OSM_VERSION}.min.js" />
+
+    <target name="version">
+        <echo message="Copying versioned file ${TS_VERSIONED}" />
+        <copy file="${TS}" tofile="${TS_VERSIONED}" />
+    </target>
 
     <!-- MAIN -->
-	<target name="min">
+	<target name="min" depends="version">
         <echo message="Building ${TS_MIN}" />
         <java jar="${JAR}" fork="true">
             <arg value="${BUILD_DIR}/min.js" />
-            <arg value="${TS}" />
+            <arg value="${TS_VERSIONED}" />
             <arg value="${TS_MIN}" />
         </java>
         <echo message="${TS_MIN} built." />
