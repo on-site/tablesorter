@@ -597,7 +597,7 @@
                     // var s = (table.config.parsers[c].type == "text") ? ((order == 0)
                     // ? makeSortText(c) : makeSortTextDesc(c)) : ((order == 0) ?
                     // makeSortNumeric(c) : makeSortNumericDesc(c));
-                    var s = (table.config.parsers[c].type == "text") ? ((order == 0) ? makeSortFunction("text", "asc", c) : makeSortFunction("text", "desc", c)) : ((order == 0) ? makeSortFunction("numeric", "asc", c) : makeSortFunction("numeric", "desc", c));
+                    var s = (table.config.parsers[c].type == "text") ? ((order == 0) ? makeSortFunction("text", "asc", c) : makeSortFunction("text", "desc", c)) : ((table.config.parsers[c].type == "array") ? ((order == 0) ? makeSortFunction("array", "asc", c) : makeSortFunction("array", "desc", c)) : ((order == 0) ? makeSortFunction("numeric", "asc", c) : makeSortFunction("numeric", "desc", c)));
                     var e = "e" + i;
 
                     dynamicExp += "var " + e + " = " + s; // + "(a[" + c + "],b[" + c
@@ -633,6 +633,47 @@
                 return cache;
             };
 
+            this.arraySort = {
+                asc: function(a, b) {
+                    for (var i = 0; i < a.length && i < b.length; i++) {
+                        if (typeof(a[i]) == "number" && typeof(b[i]) == "number" && a[i] != b[i]) {
+                            return a[i] - b[i];
+                        }
+
+                        if (a[i] != b[i]) {
+                            return (("" + a[i]) < ("" + b[i])) ? -1 : 1;
+                        }
+                    }
+
+                    if (b.length > a.length) {
+                        return Number.NEGATIVE_INFINITY;
+                    } else if (b.length < a.length) {
+                        return Number.POSITIVE_INFINITY;
+                    }
+
+                    return 0;
+                },
+                desc: function(a, b) {
+                    for (var i = 0; i < a.length && i < b.length; i++) {
+                        if (typeof(a[i]) == "number" && typeof(b[i]) == "number" && a[i] != b[i]) {
+                            return b[i] - a[i];
+                        }
+
+                        if (a[i] != b[i]) {
+                            return (("" + a[i]) < ("" + b[i])) ? 1 : -1;
+                        }
+                    }
+
+                    if (b.length > a.length) {
+                        return Number.POSITIVE_INFINITY;
+                    } else if (b.length < a.length) {
+                        return Number.NEGATIVE_INFINITY;
+                    }
+
+                    return 0;
+                }
+            };
+
             function makeSortFunction(type, direction, index) {
                 var a = "a[" + index + "]",
                     b = "b[" + index + "]";
@@ -644,6 +685,10 @@
                     return "(" + a + " === null && " + b + " === null) ? 0 :(" + a + " === null ? Number.POSITIVE_INFINITY : (" + b + " === null ? Number.NEGATIVE_INFINITY : " + a + " - " + b + "));";
                 } else if (type == 'numeric' && direction == 'desc') {
                     return "(" + a + " === null && " + b + " === null) ? 0 :(" + a + " === null ? Number.POSITIVE_INFINITY : (" + b + " === null ? Number.NEGATIVE_INFINITY : " + b + " - " + a + "));";
+                } else if (type == 'array' && direction == 'asc') {
+                    return "(" + a + ".length == 0 && " + b + ".length == 0) ? 0 : $.tablesorter.arraySort.asc(" + a + ", " + b + ");"
+                } else if (type == 'array' && direction == 'desc') {
+                    return "(" + a + ".length == 0 && " + b + ".length == 0) ? 0 : $.tablesorter.arraySort.desc(" + a + ", " + b + ");"
                 }
             };
 
@@ -1002,6 +1047,35 @@
                 p = (!c.parserMetadataName) ? 'sortValue' : c.parserMetadataName;
             return $(cell).metadata()[p];
         }, type: "numeric"
+    });
+    ts.addParser({
+        id: "mixed",
+        is: function (s) {
+            return false;
+        }, format: function (s, table, cell) {
+            var result = [];
+            var regex = /\d+/g;
+            var index = 0;
+            var match = regex.exec(s);
+
+            var addSection = function(value) {
+                value = $.trim(value);
+
+                if (value.length > 0) {
+                    result.push(value);
+                }
+            };
+
+            while (match) {
+                addSection(s.substring(index, match.index));
+                index = match.index + match[0].length;
+                result.push(parseInt(match[0], 10));
+                match = regex.exec(s);
+            }
+
+            addSection(s.substring(index, s.length));
+            return result;
+        }, type: "array"
     });
     // add default widgets
     ts.addWidget({

@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>Demo OSM Enhancements</title>
+    <style type="text/css">@import "../themes/blue/style.css";</style>
+    <script type="text/javascript" src="../jquery-latest.js"></script>
+    <script type="text/javascript" src="../jquery.tablesorter.js"></script>
+    <script type="text/javascript">
+      var CITIES = ["Albany", "Boulder", "Denver", "Honolulu", "Las Vegas", "Long Beach", "Mountain View", "New York", "Orlando", "Santa Clara", "Springfield"];
+      var STATES = ["CA", "CO", "FL", "HI", "NV", "NY"];
+      var STREET_WORDS = ["Circle", "East", "North", "Road", "South", "Street", "West"];
+
+      $.randomNumber = function(min, max) {
+        return min + Math.floor(Math.random() * (max - min + 1));
+      };
+
+      $.randomFrom = function(array) {
+        return array[$.randomNumber(0, array.length - 1)];
+      };
+
+      $.makeStreet = function() {
+          var result = "";
+          var words = $.randomNumber(0, 5);
+
+          if (words == 0) {
+              if ($.randomNumber(1, 100) > 5) {
+                  words = $.randomNumber(1, 5);
+              }
+          }
+
+          for (var i = 0; i < words; i++) {
+              if ($.randomNumber(0, 1) == 1) {
+                  result += " " + $.randomFrom(STREET_WORDS);
+              } else {
+                  var test = $.randomNumber(0, 3);
+
+                  if (test == 0) {
+                      result += " " + $.randomNumber(1, 9);
+                  } else if (test == 1) {
+                      result += " " + $.randomNumber(10, 99);
+                  } else if (test == 2) {
+                      result += " " + $.randomNumber(100, 999);
+                  } else if (test == 3) {
+                      result += " " + $.randomNumber(1000, 3000);
+                  }
+              }
+          }
+
+          return $.trim(result);
+      };
+
+      $(function() {
+        $("table").tablesorter({ headers: { 0: { sorter: "mixed" } }, widgets: ["zebra"], debug: false })
+        $("input.append").click(function() {
+          var rows = "";
+          var amount = parseInt($("input.append-amount").val(), 10);
+
+          for (var i = 0; i < amount; i++) {
+            var street = $.makeStreet();
+            var city = $.randomFrom(CITIES);
+            var state = $.randomFrom(STATES);
+            rows += "<tr><td>" + street + "</td><td>" + city + "</td><td>" + state + "</td></tr>";
+          }
+
+          $("table/tbody:first").append(rows);
+          $("table tbody tr").removeClass("even odd");
+          $("table tbody tr:even").addClass("odd");
+          $("table tbody tr:odd").addClass("even");
+          $("table").trigger("update");
+          return false;
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <h1>Demo for OSM Enhancements</h1>
+
+    <p>
+      <input type="button" class="append" value="Add" />
+      <input type="text" value="100" class="append-amount" /> rows to
+      the table.
+    </p>
+
+    <table id="large" cellspacing="0" class="tablesorter">
+      <thead>
+        <tr>
+          <th>Street</th>
+          <th>City</th>
+          <th>State</th>
+        </tr>
+      </thead>
+
+      <tfoot>
+        <tr>
+          <th>Street</th>
+          <th>City</th>
+          <th>State</th>
+        </tr>
+      </tfoot>
+
+      <tbody>
+        <tr>
+          <td>1 Castro Street</td>
+          <td>Mountain View</td>
+          <td>CA</td>
+        </tr>
+
+        <tr>
+          <td>2 Castro Street</td>
+          <td>Mountain View</td>
+          <td>CA</td>
+        </tr>
+
+        <tr>
+          <td>10 Castro Street</td>
+          <td>Mountain View</td>
+          <td>CA</td>
+        </tr>
+
+        <tr>
+          <td>5 East 10 Street</td>
+          <td>Mountain View</td>
+          <td>CA</td>
+        </tr>
+
+        <tr>
+          <td>5 East 1 Street</td>
+          <td>Mountain View</td>
+          <td>CA</td>
+        </tr>
+
+        <tr>
+          <td>5 East 2 Street</td>
+          <td>Santa Clara</td>
+          <td>CA</td>
+        </tr>
+
+        <tr>
+          <td>10 East 10 Street</td>
+          <td>Mountain View</td>
+          <td>CA</td>
+        </tr>
+
+        <tr>
+          <td>10 East 1 Street</td>
+          <td>Santa Clara</td>
+          <td>CA</td>
+        </tr>
+
+        <tr>
+          <td>10 East 2 Street</td>
+          <td>Santa Clara</td>
+          <td>CA</td>
+        </tr>
+
+        <tr>
+          <td>East 10 Street</td>
+          <td>Mountain View</td>
+          <td>CA</td>
+        </tr>
+
+        <tr>
+          <td>East 1 Street</td>
+          <td>Mountain View</td>
+          <td>CA</td>
+        </tr>
+
+        <tr>
+          <td>East 2 Street</td>
+          <td>New York</td>
+          <td>NY</td>
+        </tr>
+
+        <tr>
+          <td></td>
+          <td>Mountain View</td>
+          <td>CA</td>
+        </tr>
+
+        <tr>
+          <td>3</td>
+          <td>New York</td>
+          <td>NY</td>
+        </tr>
+
+        <tr>
+          <td>East</td>
+          <td>Mountain View</td>
+          <td>CA</td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>
